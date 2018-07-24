@@ -1,1 +1,4 @@
 server.port: 8021
+
+api.map.appkey: KakaoAK a38ce0b6a4c606bc29bfaa82957753f2
+api.map.url: https://dapi.kakao.com
