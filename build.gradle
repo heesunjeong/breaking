@@ -25,12 +25,13 @@ repositories {
 
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('org.springframework.boot:spring-boot-devtools')
 
     compile('com.fasterxml.jackson.core:jackson-core:2.9.6')
+    compile('io.springfox:springfox-swagger2:2.9.2')
+    compile('io.springfox:springfox-swagger-ui:2.0.2')
 
     compileOnly('org.projectlombok:lombok')
 

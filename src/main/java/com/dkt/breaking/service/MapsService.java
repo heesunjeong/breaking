@@ -1,81 +1,85 @@
 package com.dkt.breaking.service;
 
+import com.dkt.breaking.model.MapData;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.net.URI;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class MapsService {
-    RestTemplate restTemplate = new RestTemplate();
 
-    @Value(value = "${api.map.url}")
-    private String MAP_API;
+    private final WebClient webClient;
 
-    @Value(value = "${api.map.appkey}")
-    private String APP_KEY;
-
-    public Object requestMapApis(String host, String address) {
-        HttpHeaders headers = new HttpHeaders();
-        URI uri = UriComponentsBuilder.fromHttpUrl(MAP_API).path(host).queryParam("query", address).build().encode().toUri();
-        headers.add("Authorization", APP_KEY);
-
-        ResponseEntity response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity(headers), Object.class);
-
-        return response.getBody();
-    }
-    /**
-     * 지도 api
-     *
-     * @param     host Daum Map Api host
-     * @param     query 검색을 원하는 질의어
-     * @return    검색결과
-     * @exception
-     *
-     * @see https://developers.kakao.com/docs/restapi/local
-     */
-
-    public Object requestMapApisWithQuery(String host, Map<String, String> query) {
-        HttpHeaders headers = new HttpHeaders();
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(MAP_API).path(host);
-        headers.add("Authorization", APP_KEY);
-
-        for (Map.Entry<String, String> entry : query.entrySet()) {
-            builder.queryParam(entry.getKey(), entry.getValue());
-        }
-        URI uri = builder.build().encode().toUri();
-
-        ResponseEntity response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity(headers), Object.class);
-
-        return response.getBody();
+    public MapsService(@Value("${api.map.url}") String mapApi, @Value("${api.map.appkey}") String appKey) {
+        this.webClient = WebClient
+            .builder()
+            .baseUrl(mapApi)
+            .filter(logRequest())
+            .defaultHeader("Authorization", appKey)
+            .build();
     }
 
     /* 주소 검색 api
-     * param query, page, size
+     * param: query, page, size
      * */
-    public Object getAddress(String address) {
-        String host = "v2/local/search/address.json";
-        return requestMapApis(host, address);
+    public Mono<MapData> getAddress(String address) {
+        String path = "v2/local/search/address.json";
+        return requestMapApis(path, address);
     }
 
     /* 키워드로 장소 검색 api
-     * param query, category_group_code, x, y, radius, rect, page, size, sort
+     * param: query, category_group_code, x, y, radius, rect, page, size, sort
      * */
-    public Object getPlaceByKeyword(Map<String, String> query) {
-        String host = "/v2/local/search/keyword.json";
-        return requestMapApisWithQuery(host, query);
+    public Mono<MapData> getPlaceByKeyword(MultiValueMap<String, String> query) {
+        String path = "/v2/local/search/keyword.json";
+        return requestMapApisWithQuery(path, query);
     }
 
     /* 카테고리로 장소 검색 api */
     public Object getPlaceByCategory(String category) {
         String host = " /v2/local/search/category.json";
         return requestMapApis(host, category);
+    }
+
+    public Mono<MapData> requestMapApis(String path, String address) {
+        return this.webClient
+            .get()
+            .uri(builder -> builder.path(path).queryParam("query", address).build())
+            .retrieve()
+            .bodyToMono(MapData.class);
+    }
+
+    /**
+     * 지도 api
+     *
+     * @param path  Daum Map Api host
+     * @param query 검색을 원하는 질의어
+     * @return 검색결과
+     * @throws
+     * @seehttps://developers.kakao.com/docs/restapi/local
+     */
+
+    public Mono<MapData> requestMapApisWithQuery(String path, MultiValueMap<String, String> query) {
+        Mono<MapData> result = this.webClient
+            .get()
+            .uri(builder -> builder.path(path).queryParams(query).build())
+            .retrieve()
+            .bodyToMono(MapData.class);
+
+        return result;
+    }
+
+    private ExchangeFilterFunction logRequest() {
+        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
+            log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
+            return Mono.just(clientRequest);
+        });
     }
 }
