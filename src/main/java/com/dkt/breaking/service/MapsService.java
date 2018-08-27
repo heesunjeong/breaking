@@ -58,12 +58,13 @@ public class MapsService {
 
     /**
      * 지도 api
+     * Daum Map api docs: https://developers.kakao.com/docs/restapi/local
      *
      * @param path  Daum Map Api host
      * @param query 검색을 원하는 질의어
      * @return 검색결과
      * @throws
-     * @seehttps://developers.kakao.com/docs/restapi/local
+     * @see
      */
 
     public Mono<MapData> requestMapApisWithQuery(String path, MultiValueMap<String, String> query) {

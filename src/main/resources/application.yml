@@ -1,4 +1,15 @@
 server.port: 8021
 
-api.map.appkey: KakaoAK a38ce0b6a4c606bc29bfaa82957753f2
-api.map.url: https://dapi.kakao.com
+# Mongodb config
+spring:
+  data:
+    mongodb:
+      host: 10.201.0.13
+      port: 10200
+      database: break_tastyload
+
+# Kakao map api
+api:
+  map:
+    appkey: KakaoAK a38ce0b6a4c606bc29bfaa82957753f2
+    url: https://dapi.kakao.com
