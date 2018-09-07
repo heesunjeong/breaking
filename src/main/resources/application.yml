@@ -7,6 +7,10 @@ spring:
       host: 10.201.0.13
       port: 10200
       database: break_tastyload
+  session:
+    store-type: mongodb
+    jdbc:
+      table-name: sessions
 
 # Kakao map api
 api:
