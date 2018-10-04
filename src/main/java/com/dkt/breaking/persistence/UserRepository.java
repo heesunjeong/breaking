@@ -1,5 +1,6 @@
 package com.dkt.breaking.persistence;
 
+import com.dkt.breaking.configuration.security.BreakingUserDetails;
 import com.dkt.breaking.model.User;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
@@ -10,5 +11,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface UserRepository extends ReactiveCrudRepository<User, String> {
 
-    Mono<User> findByEmail(String name);
+    Mono<BreakingUserDetails> findByEmail(String name);
+
+    Mono<User> findUserById(String id);
 }

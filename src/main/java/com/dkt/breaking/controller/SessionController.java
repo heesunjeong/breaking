@@ -1,14 +1,16 @@
 package com.dkt.breaking.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.WebSession;
+
+import java.security.Principal;
 
 @RestController
 public class SessionController {
 
-    @RequestMapping("session")
-    public void uid(WebSession session) {
-        System.out.println(session.getId());
+    @GetMapping("session")
+    public void uid(WebSession session, Principal principal) {
+        System.out.println(principal);
     }
 }
