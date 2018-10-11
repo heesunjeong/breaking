@@ -17,3 +17,9 @@ api:
   map:
     appkey: KakaoAK a38ce0b6a4c606bc29bfaa82957753f2
     url: https://dapi.kakao.com
+
+# app key
+app:
+  jwt:
+    Secret: secretsecret
+    expiration: 604800000

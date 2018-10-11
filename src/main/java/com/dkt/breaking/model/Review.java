@@ -1,6 +1,10 @@
 package com.dkt.breaking.model;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 
@@ -23,4 +27,8 @@ public class Review extends BaseEntity {
     private String userId;
     private String contents;
     private String userName;
+    @CreatedDate
+    private LocalDateTime reg_at;
+    @LastModifiedDate
+    private LocalDateTime mod_at;
 }
