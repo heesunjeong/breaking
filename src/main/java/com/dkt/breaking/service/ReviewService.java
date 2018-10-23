@@ -6,10 +6,6 @@ import com.dkt.breaking.persistence.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,10 +25,7 @@ public class ReviewService {
     }
 
     public Flux<Review> readReviews(Mono<String> storeId) {
-        Map<String, String> reviewDetails = new HashMap<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        return reviewRepository.findByStoreId(storeId).log();
+        return reviewRepository.findByStoreId(storeId)
+            .filter(review -> !review.getDeleted());
     }
-
 }

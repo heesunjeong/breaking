@@ -1,12 +1,16 @@
 package com.dkt.breaking.service;
 
+import com.dkt.breaking.configuration.security.JwtTokenProvider;
 import com.dkt.breaking.model.User;
 import com.dkt.breaking.persistence.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ServerWebExchange;
 
 import reactor.core.publisher.Mono;
 
@@ -16,6 +20,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     public Mono<Boolean> saveUser(User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
@@ -24,16 +31,21 @@ public class UserService {
             .defaultIfEmpty(false);
     }
 
-    public Mono<Boolean> getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-            .map(u -> true)
-            .defaultIfEmpty(false);
+    public Mono<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
-    public Mono<String> getUserNameById(String id) {
-        return userRepository.findUserById(id)
-            .map(user -> user.getName())
-            .defaultIfEmpty(null);
+    public String getUserNameByToken(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String authToken = authHeader.substring(7);
+            return jwtTokenProvider.getUsernameFromToken(authToken);
+
+        } else {
+            return "";
+        }
     }
 
     @PreAuthorize("hasPermission(#user, 'edit')")

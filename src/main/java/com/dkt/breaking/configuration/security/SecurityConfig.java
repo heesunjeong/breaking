@@ -39,6 +39,8 @@ public class SecurityConfig {
             .and()
 
             .authorizeExchange()
+                /*.pathMatchers("/user/login", "/user/register", "/maps/**").permitAll()
+                .anyExchange().authenticated()*/
                 .pathMatchers("/review/create").authenticated()
                 .anyExchange().permitAll()
 

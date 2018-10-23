@@ -1,10 +1,15 @@
 package com.dkt.breaking.model;
 
+import com.dkt.breaking.configuration.security.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -34,4 +39,16 @@ public class User extends BaseEntity {
     private LocalDateTime reg_at;
     @LastModifiedDate
     private LocalDateTime mod_at;
+    @JsonIgnore
+    private Set<UserRole> roles;
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    @JsonProperty
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

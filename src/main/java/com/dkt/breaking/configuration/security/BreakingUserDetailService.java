@@ -20,6 +20,7 @@ public class BreakingUserDetailService implements ReactiveUserDetailsService {
     public Mono<UserDetails> findByUsername(String username) {
         return userRepository.findByEmail(username)
             .switchIfEmpty(Mono.defer(() -> Mono.error(new UsernameNotFoundException("User Not Found"))))
+            .map(user -> new BreakingUserDetails(user))
             .cast(UserDetails.class);
     }
 }

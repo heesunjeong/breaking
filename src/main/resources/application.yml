@@ -4,13 +4,7 @@ server.port: 8021
 spring:
   data:
     mongodb:
-      host: 10.201.0.13
-      port: 10200
-      database: break_tastyload
-  session:
-    store-type: mongodb
-    jdbc:
-      table-name: sessions
+      uri: mongodb://10.201.0.13:10200/break_tastyload
 
 # Kakao map api
 api:
@@ -22,4 +16,4 @@ api:
 app:
   jwt:
     Secret: secretsecret
-    expiration: 604800000
+    expiration: 28800
