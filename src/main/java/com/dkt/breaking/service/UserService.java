@@ -40,7 +40,7 @@ public class UserService {
     }
 
     public String getUserIdByToken(String authToken) {
-        return jwtTokenProvider.getAllClaimsFromToken(authToken).getId();
+        return String.valueOf(jwtTokenProvider.getAllClaimsFromToken(authToken).get("id"));
     }
 
     public String getJwtToken(ServerWebExchange exchange) {

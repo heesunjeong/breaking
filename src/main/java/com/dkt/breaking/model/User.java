@@ -16,19 +16,16 @@ import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Data
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Document(collection = "users")
 public class User {
+
     @Id
     @Field("_id")
     private String id;
@@ -50,11 +47,14 @@ public class User {
     @JsonIgnore
     private Set<UserRole> roles;
 
+    public User(String id) {
+        this.id = id;
+    }
+
     @JsonIgnore
     public String getPassword() {
         return password;
     }
-
     @JsonProperty
     public void setPassword(String password) {
         this.password = password;

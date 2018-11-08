@@ -23,13 +23,12 @@ public class ReviewService {
 
     public Mono<Boolean> createReview(Review review, ServerWebExchange exchange) {
 
-        String userId = userService.getUserNameByToken(userService.getJwtToken(exchange));
+        String userId = userService.getUserIdByToken(userService.getJwtToken(exchange));
 
-        if (userId == "") {
+        if (userId == "" || userId.isEmpty()) {
             return Mono.error(new UnsupportedJwtException("Not Supported Token Error"));
         } else {
-            User userInfo = new User();
-            review.setAuthor(userInfo);
+            review.setAuthor(new User(userId));
             return reviewRepository.save(review)
                 .map(u -> true)
                 .defaultIfEmpty(false);
