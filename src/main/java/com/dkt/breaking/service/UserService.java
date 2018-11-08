@@ -35,14 +35,20 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public String getUserNameByToken(ServerWebExchange exchange) {
+    public String getUserNameByToken(String authToken) {
+        return jwtTokenProvider.getUsernameFromToken(authToken);
+    }
+
+    public String getUserIdByToken(String authToken) {
+        return jwtTokenProvider.getAllClaimsFromToken(authToken).getId();
+    }
+
+    public String getJwtToken(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String authToken = authHeader.substring(7);
-            return jwtTokenProvider.getUsernameFromToken(authToken);
-
+            return authHeader.substring(7);
         } else {
             return "";
         }

@@ -35,7 +35,7 @@ import reactor.core.publisher.Mono;
 public class UserController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
     private BreakingUserDetailService userDetailService;
@@ -66,7 +66,7 @@ public class UserController {
 
     @GetMapping("info")
     public Mono<User> getUserInfo(ServerWebExchange exchange) {
-        String email = userService.getUserNameByToken(exchange);
+        String email = userService.getUserNameByToken(userService.getJwtToken(exchange));
         return userService.getUserByEmail(email);
     }
 

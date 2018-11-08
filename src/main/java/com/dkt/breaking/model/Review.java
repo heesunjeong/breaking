@@ -3,6 +3,7 @@ package com.dkt.breaking.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,24 +17,26 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import reactor.core.publisher.Mono;
 
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Getter
 @Setter
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "reviews")
-public class Review extends BaseEntity {
+public class Review {
 
+    @Id
+    private String id;
     @NotNull
     private String storeId;
     @DBRef
-    private Mono<User> author;
+    private User author;
     private String contents;
     @CreatedDate
     private LocalDateTime reg_at;
     @LastModifiedDate
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime mod_at;
+    private Boolean deleted = Boolean.FALSE;
 }

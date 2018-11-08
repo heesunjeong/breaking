@@ -2,7 +2,6 @@ package com.dkt.breaking.controller;
 
 import com.dkt.breaking.model.Review;
 import com.dkt.breaking.service.ReviewService;
-import com.dkt.breaking.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
-import io.jsonwebtoken.UnsupportedJwtException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -24,23 +22,11 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    @Autowired
-    private UserService userService;
-
 
     @PostMapping(value = "create")
     /*@PreAuthorize("hasRole('ROLE_USER')")*/
     public Mono<Boolean> insertReview(@RequestBody Review review, ServerWebExchange exchange) {
-        String userName = userService.getUserNameByToken(exchange);
-
-        if (userName == "") {
-            return Mono.error(new UnsupportedJwtException("Not Supported Token Error"));
-        } else {
-
-            review.setAuthor(userService.getUserByEmail(userName));
-
-            return reviewService.createReview(review);
-        }
+        return reviewService.createReview(review, exchange);
     }
 
     @GetMapping(value = "/{storeId}")

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -16,20 +18,25 @@ import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Document(collection = "users")
-public class User extends BaseEntity {
-
+public class User {
+    @Id
+    @Field("_id")
+    private String id;
     @NotNull
     private String name;
     @Email
     @NotNull
     private String email;
-    @NotNull
     private String password;
     private String gender;
     private String birth;
@@ -39,6 +46,7 @@ public class User extends BaseEntity {
     private LocalDateTime reg_at;
     @LastModifiedDate
     private LocalDateTime mod_at;
+    private Boolean deleted = Boolean.FALSE;
     @JsonIgnore
     private Set<UserRole> roles;
 

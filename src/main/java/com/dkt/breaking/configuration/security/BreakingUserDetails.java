@@ -18,7 +18,7 @@ import lombok.Data;
 @Document
 public class BreakingUserDetails implements UserDetails {
 
-    private User user;
+    public User user;
 
     public BreakingUserDetails(User user) {
         this.user = user;
