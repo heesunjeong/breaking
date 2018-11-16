@@ -1,16 +1,27 @@
 package com.dkt.breaking.service;
 
+import com.dkt.breaking.configuration.security.BreakingUserDetailService;
+import com.dkt.breaking.configuration.security.BreakingUserDetails;
 import com.dkt.breaking.configuration.security.JwtTokenProvider;
+import com.dkt.breaking.configuration.security.UserRole;
+import com.dkt.breaking.model.AuthResponse;
+import com.dkt.breaking.model.Passwords;
 import com.dkt.breaking.model.User;
 import com.dkt.breaking.persistence.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Collections;
 
 import reactor.core.publisher.Mono;
 
@@ -18,12 +29,31 @@ import reactor.core.publisher.Mono;
 public class UserService {
 
     @Autowired
+    private BreakingUserDetailService userDetailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    public Mono<Boolean> saveUser(User user) {
+    public Mono<AuthResponse> login(User user) {
+        return userDetailService.findByUsername(user.getEmail())
+            .filter(userDetails -> passwordEncoder.matches(user.getPassword(), userDetails.getPassword()))
+            .map(userDetails -> {
+                User userInfo = ((BreakingUserDetails) userDetails).getUser();
+                return new AuthResponse(jwtTokenProvider.generateToken(userDetails), userInfo.getName(), userInfo.getId());
+            })
+            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid User Info")))
+            .onErrorResume(UsernameNotFoundException.class,
+                e -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not Found User", e)));
+    }
+
+    public Mono<Boolean> addUser(User user) {
+        user.setRoles(Collections.singleton(UserRole.ROLE_USER));
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
         return userRepository.save(user)
@@ -31,8 +61,42 @@ public class UserService {
             .defaultIfEmpty(false);
     }
 
-    public Mono<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Mono<User> getUserById(String userId, ServerWebExchange exchange) {
+        if (userId.equals("0")) {
+            userId = getUserIdByToken(getJwtToken(exchange));
+        }
+
+        return userRepository.findById(userId);
+    }
+
+    public Mono<Boolean> updateUser(User user, ServerWebExchange exchange) {
+        String userId = getUserIdByToken(getJwtToken(exchange));
+
+        return userRepository.findById(user.getId())
+            .filter(u -> u.getId().equals(userId))
+            .flatMap(u -> {
+                u.setName(user.getName());
+                u.setGender(user.getGender());
+                u.setBirth(user.getBirth());
+                u.setBio(user.getBio());
+
+                return userRepository.save(u);
+            })
+            .map(u -> true)
+            .defaultIfEmpty(false);
+    }
+
+    public Mono<Boolean> updatePassword(Passwords passwords, ServerWebExchange exchange) {
+        String userToken = getJwtToken(exchange);
+
+        return userRepository.findById(getUserIdByToken(userToken))
+            .filter(u -> passwordEncoder.matches(passwords.getPassword(), u.getPassword()))
+            .flatMap(u -> {
+                u.setPassword(new BCryptPasswordEncoder().encode(passwords.getNewPassword()));
+                return userRepository.save(u);
+            })
+            .map(u -> true)
+            .defaultIfEmpty(false);
     }
 
     public String getUserNameByToken(String authToken) {

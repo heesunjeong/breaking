@@ -1,8 +1,10 @@
 package com.dkt.breaking.configuration.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -28,7 +30,15 @@ public class JwtTokenProvider implements Serializable {
     private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+        Claims claims;
+
+        try {
+            claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unsupported JWT Token", e);
+        }
+        return claims;
     }
 
     public String getUsernameFromToken(String token) {

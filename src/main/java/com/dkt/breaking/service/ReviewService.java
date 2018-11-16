@@ -21,7 +21,7 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    public Mono<Boolean> createReview(Review review, ServerWebExchange exchange) {
+    public Mono<Boolean> addReview(Review review, ServerWebExchange exchange) {
         String userId = validateTokenAndGetUserId(exchange);
 
         review.setAuthor(new User(userId));
@@ -30,7 +30,7 @@ public class ReviewService {
             .defaultIfEmpty(false);
     }
 
-    public Flux<Review> readReviews(Mono<String> storeId) {
+    public Flux<Review> getReviewList(Mono<String> storeId) {
         return reviewRepository.findByStoreId(storeId)
             .filter(review -> !review.getDeleted());
     }
@@ -68,5 +68,10 @@ public class ReviewService {
             })
             .map(r -> true)
             .defaultIfEmpty(false);
+    }
+
+    public Flux<Review> getReviewListByAuthor(String userId) {
+        return reviewRepository.findByAuthor(Mono.just(userId))
+            .filter(r -> !r.getDeleted());
     }
 }

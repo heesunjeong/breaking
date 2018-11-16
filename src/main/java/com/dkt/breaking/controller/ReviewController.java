@@ -26,22 +26,27 @@ public class ReviewController {
 
     @PostMapping(value = "create")
     /*@PreAuthorize("hasRole('ROLE_USER')")*/
-    public Mono<Boolean> insertReview(@RequestBody Review review, ServerWebExchange exchange) {
-        return reviewService.createReview(review, exchange);
+    public Mono<Boolean> addReview(@RequestBody Review review, ServerWebExchange exchange) {
+        return reviewService.addReview(review, exchange);
     }
 
     @GetMapping(value = "/{storeId}")
-    public Flux<Review> roadReviews(@PathVariable String storeId) {
-        return reviewService.readReviews(Mono.just(storeId));
+    public Flux<Review> getReviewList(@PathVariable String storeId) {
+        return reviewService.getReviewList(Mono.just(storeId));
     }
 
     @PutMapping(value = "/update")
-    public  Mono<Boolean> updateReview(@RequestBody Review review, ServerWebExchange exchange) {
+    public Mono<Boolean> updateReview(@RequestBody Review review, ServerWebExchange exchange) {
         return reviewService.updateReview(review, exchange);
     }
 
     @DeleteMapping(value = "/{reviewId}")
     public Mono<Boolean> deleteReview(@PathVariable String reviewId, ServerWebExchange exchange) {
         return reviewService.deleteReview(reviewId, exchange);
+    }
+
+    @GetMapping(value = "/author/{userId}")
+    public Flux<Review> getReviewByAuthor(@PathVariable String userId) {
+        return reviewService.getReviewListByAuthor(userId);
     }
 }

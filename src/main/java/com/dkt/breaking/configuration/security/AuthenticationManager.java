@@ -1,15 +1,16 @@
 package com.dkt.breaking.configuration.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.UnsupportedJwtException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -45,7 +46,7 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
                 null);
             return Mono.just(auth);
         } else {
-            return Mono.error(new UnsupportedJwtException("Not Match Signature"));
+            return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not Match Signature"));
         }
     }
 }

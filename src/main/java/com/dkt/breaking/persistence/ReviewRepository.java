@@ -12,4 +12,6 @@ import reactor.core.publisher.Mono;
 public interface ReviewRepository extends ReactiveCrudRepository<Review, String> {
 
     Flux<Review> findByStoreId(Mono<String> storeId);
+
+    Flux<Review> findByAuthor(Mono<String> userId);
 }

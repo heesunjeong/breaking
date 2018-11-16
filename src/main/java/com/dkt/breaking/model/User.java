@@ -37,6 +37,8 @@ public class User {
     private String password;
     private String gender;
     private String birth;
+    private String bio;
+    private String profileImage;
     private String type;
     private String interface_type;
     @CreatedDate
