@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import reactor.core.publisher.Mono;
 
@@ -36,6 +37,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -99,10 +103,6 @@ public class UserService {
             .defaultIfEmpty(false);
     }
 
-    public String getUserNameByToken(String authToken) {
-        return jwtTokenProvider.getUsernameFromToken(authToken);
-    }
-
     public String getUserIdByToken(String authToken) {
         return String.valueOf(jwtTokenProvider.getAllClaimsFromToken(authToken).get("id"));
     }
@@ -116,6 +116,18 @@ public class UserService {
         } else {
             return "";
         }
+    }
+
+    public Mono<Boolean> findPassword(String email) {
+        String newPassword = UUID.randomUUID().toString().replaceAll("-", "");
+
+        return userRepository.findByEmail(email)
+            .flatMap(u -> {
+                u.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+                return userRepository.save(u);
+            })
+            .map(u -> emailService.sendSimpleMessage(email, "[우리 오늘 맛집 뿌셔?] 새로운 비밀번호입니다.", String.format("새로운 비밀번호는 %s 입니다.", newPassword)))
+            .defaultIfEmpty(false);
     }
 
     @PreAuthorize("hasPermission(#user, 'edit')")

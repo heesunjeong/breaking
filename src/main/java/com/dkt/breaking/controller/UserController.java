@@ -56,6 +56,11 @@ public class UserController {
         return userService.updatePassword(passwords, exchange);
     }
 
+    @GetMapping("findPassword/{email}")
+    public Mono<Boolean> findPassword(@PathVariable String email) {
+        return userService.findPassword(email);
+    }
+
     private ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             log.info("Request: {} {}", clientRequest.method(), clientRequest.url());

@@ -1,10 +1,20 @@
 server.port: 8021
 
-# Mongodb config
+# Mongodb, Mail config
 spring:
   data:
     mongodb:
       uri: mongodb://10.201.0.13:10200/break_tastyload
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    protocol: smtp
+    default-encoding: UTF-8
+    username: break.tastyload@gmail.com
+    password: .;/%^!*%.&:_
+    properties.mail.smtp:
+      starttls.enable: true
+      auth: true
 
 # Kakao map api
 api:
