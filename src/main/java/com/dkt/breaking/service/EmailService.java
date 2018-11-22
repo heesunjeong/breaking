@@ -16,7 +16,7 @@ public class EmailService {
     public JavaMailSender emailSender;
 
     public boolean sendSimpleMessage(String to, String subject, String text) {
-        String from = String.format("우리 오늘 맛집뿌셔? <%s>", fromMail);
+        String from = String.format("우리 오늘 맛집 뿌셔? <%s>", fromMail);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
