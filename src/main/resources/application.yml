@@ -1,10 +1,15 @@
 server.port: 8021
 
-# Mongodb, Mail config
 spring:
   data:
     mongodb:
       uri: mongodb://10.201.0.13:10200/break_tastyload
+
+  redis:
+    host: 10.201.0.13
+    port: 8077
+    password: bbbbbbbreaking$$
+
   mail:
     host: smtp.gmail.com
     port: 587

@@ -67,14 +67,14 @@ public class UserService {
 
     public Mono<User> getUserById(String userId, ServerWebExchange exchange) {
         if (userId.equals("0")) {
-            userId = getUserIdByToken(getJwtToken(exchange));
+            userId = getUserIdByToken(exchange);
         }
 
         return userRepository.findById(userId);
     }
 
     public Mono<Boolean> updateUser(User user, ServerWebExchange exchange) {
-        String userId = getUserIdByToken(getJwtToken(exchange));
+        String userId = getUserIdByToken(exchange);
 
         return userRepository.findById(user.getId())
             .filter(u -> u.getId().equals(userId))
@@ -91,9 +91,9 @@ public class UserService {
     }
 
     public Mono<Boolean> updatePassword(Passwords passwords, ServerWebExchange exchange) {
-        String userToken = getJwtToken(exchange);
+        String userToken = getUserIdByToken(exchange);
 
-        return userRepository.findById(getUserIdByToken(userToken))
+        return userRepository.findById(userToken)
             .filter(u -> passwordEncoder.matches(passwords.getPassword(), u.getPassword()))
             .flatMap(u -> {
                 u.setPassword(new BCryptPasswordEncoder().encode(passwords.getNewPassword()));
@@ -101,21 +101,6 @@ public class UserService {
             })
             .map(u -> true)
             .defaultIfEmpty(false);
-    }
-
-    public String getUserIdByToken(String authToken) {
-        return String.valueOf(jwtTokenProvider.getAllClaimsFromToken(authToken).get("id"));
-    }
-
-    public String getJwtToken(ServerWebExchange exchange) {
-        ServerHttpRequest request = exchange.getRequest();
-        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        } else {
-            return "";
-        }
     }
 
     public Mono<Boolean> findPassword(String email) {
@@ -128,6 +113,24 @@ public class UserService {
             })
             .map(u -> emailService.sendSimpleMessage(email, "[우리 오늘 맛집 뿌셔?] 새로운 비밀번호입니다.", String.format("새로운 비밀번호는 %s 입니다.", newPassword)))
             .defaultIfEmpty(false);
+    }
+
+    public String getUserIdByToken(ServerWebExchange exchange) {
+        String authToken = getJwtToken(exchange);
+
+        //TODO 토큰 확인하고 만료됐으면 refresh 확인하기
+        return String.valueOf(jwtTokenProvider.getAllClaimsFromToken(authToken).get("id"));
+    }
+
+    public String getJwtToken(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        } else {
+            return "";
+        }
     }
 
     @PreAuthorize("hasPermission(#user, 'edit')")

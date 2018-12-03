@@ -1,5 +1,8 @@
 package com.dkt.breaking.configuration.security;
 
+import com.dkt.breaking.service.RedisService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +13,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -27,6 +31,11 @@ public class JwtTokenProvider implements Serializable {
     @Value("${app.jwt.expiration}")
     private String expirationTime;
 
+    @Autowired
+    private RedisService redisService;
+
+    private String REDIS_KEY = "break:user:refresh:%s";
+
     private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public Claims getAllClaimsFromToken(String token) {
@@ -36,7 +45,7 @@ public class JwtTokenProvider implements Serializable {
             claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
 
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unsupported JWT Token", e);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
         }
         return claims;
     }
@@ -59,6 +68,9 @@ public class JwtTokenProvider implements Serializable {
         claims.put("role", user.getAuthorities());
         claims.put("enable", user.isEnabled());
         claims.put("id", ((BreakingUserDetails) user).getUser().getId());
+
+        generateRefreshToken(((BreakingUserDetails) user).getUser().getId());
+
         return doGenerateToken(claims, user.getUsername());
     }
 
@@ -74,6 +86,11 @@ public class JwtTokenProvider implements Serializable {
             .setExpiration(expirationDate)
             .signWith(key)
             .compact();
+    }
+
+    private void generateRefreshToken(String userId) {
+        String refreshToken = UUID.randomUUID().toString().replaceAll("-", "");
+        redisService.setRedis(String.format(REDIS_KEY, userId), refreshToken);
     }
 
     public Boolean validateToken(String token) {

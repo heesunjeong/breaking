@@ -5,6 +5,7 @@ import com.dkt.breaking.model.User;
 import com.dkt.breaking.persistence.ReviewRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -21,7 +22,7 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    public Mono<Boolean> addReview(Review review, ServerWebExchange exchange) {
+    public Mono<Boolean> saveReview(Review review, ServerWebExchange exchange) {
         String userId = validateTokenAndGetUserId(exchange);
 
         review.setAuthor(new User(userId));
@@ -30,9 +31,8 @@ public class ReviewService {
             .defaultIfEmpty(false);
     }
 
-    public Flux<Review> getReviewList(Mono<String> storeId) {
-        return reviewRepository.findByStoreId(storeId)
-            .filter(review -> !review.getDeleted());
+    public Flux<Review> getReviewList(Mono<String> storeKey, int page, int size) {
+        return reviewRepository.findByStoreKeyAndDeletedFalse(storeKey, PageRequest.of(page, size));
     }
 
     public Mono<Boolean> updateReview(Review review, ServerWebExchange exchange) {
@@ -46,15 +46,6 @@ public class ReviewService {
             })
             .map(r -> true)
             .defaultIfEmpty(false);
-    }
-
-    private String validateTokenAndGetUserId(ServerWebExchange exchange) {
-        String userId = userService.getUserIdByToken(userService.getJwtToken(exchange));
-
-        if (userId == "" || userId.isEmpty()) {
-            new UnsupportedJwtException("Not Supported Token Error");
-        }
-        return userId;
     }
 
     public Mono<Boolean> deleteReview(String reviewId, ServerWebExchange exchange) {
@@ -73,5 +64,18 @@ public class ReviewService {
     public Flux<Review> getReviewListByAuthor(String userId) {
         return reviewRepository.findByAuthor(Mono.just(userId))
             .filter(r -> !r.getDeleted());
+    }
+
+    private String validateTokenAndGetUserId(ServerWebExchange exchange) {
+        String userId = userService.getUserIdByToken(exchange);
+
+        if (userId == "" || userId.isEmpty()) {
+            new UnsupportedJwtException("Not Supported Token Error");
+        }
+        return userId;
+    }
+
+    public Mono<Long> countReview(Mono<String> storeKey) {
+        return reviewRepository.countByStoreKeyAndDeletedFalse(storeKey).defaultIfEmpty(0L);
     }
 }

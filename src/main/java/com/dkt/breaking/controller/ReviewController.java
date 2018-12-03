@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -26,13 +27,18 @@ public class ReviewController {
 
     @PostMapping(value = "create")
     /*@PreAuthorize("hasRole('ROLE_USER')")*/
-    public Mono<Boolean> addReview(@RequestBody Review review, ServerWebExchange exchange) {
-        return reviewService.addReview(review, exchange);
+    public Mono<Boolean> saveReview(@RequestBody Review review, ServerWebExchange exchange) {
+        return reviewService.saveReview(review, exchange);
     }
 
-    @GetMapping(value = "/{storeId}")
-    public Flux<Review> getReviewList(@PathVariable String storeId) {
-        return reviewService.getReviewList(Mono.just(storeId));
+    @GetMapping(value = "/list")
+    public Flux<Review> getReviewList(@RequestParam String storeKey, @RequestParam(name = "page", defaultValue = "0") Integer page, @RequestParam(name = "size", defaultValue = "5") Integer size) {
+        return reviewService.getReviewList(Mono.just(storeKey), page, size);
+    }
+
+    @GetMapping(value = "/count")
+    public Mono<Long> count(@RequestParam String storeKey) {
+        return reviewService.countReview(Mono.just(storeKey));
     }
 
     @PutMapping(value = "/update")

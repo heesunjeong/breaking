@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
@@ -28,10 +27,9 @@ import lombok.Setter;
 public class Review {
 
     @Id
-    @Field("_id")
     private String id;
     @NotNull
-    private String storeId;
+    private String storeKey;
     @DBRef
     private User author;
     private String contents;
@@ -41,4 +39,6 @@ public class Review {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime mod_at;
     private Boolean deleted = Boolean.FALSE;
+
+    private Long Pageable;
 }
