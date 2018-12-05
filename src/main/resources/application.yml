@@ -1,4 +1,34 @@
 server.port: 8021
 
-api.map.appkey: KakaoAK a38ce0b6a4c606bc29bfaa82957753f2
-api.map.url: https://dapi.kakao.com
+spring:
+  data:
+    mongodb:
+      uri: mongodb://10.201.0.13:10200/break_tastyload
+
+  redis:
+    host: 10.201.0.13
+    port: 8077
+    password: bbbbbbbreaking$$
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    protocol: smtp
+    default-encoding: UTF-8
+    username: break.tastyload@gmail.com
+    password: .;/%^!*%.&:_
+    properties.mail.smtp:
+      starttls.enable: true
+      auth: true
+
+# Kakao map api
+api:
+  map:
+    appkey: KakaoAK a38ce0b6a4c606bc29bfaa82957753f2
+    url: https://dapi.kakao.com
+
+# app key
+app:
+  jwt:
+    Secret: secretsecret
+    expiration: 28800

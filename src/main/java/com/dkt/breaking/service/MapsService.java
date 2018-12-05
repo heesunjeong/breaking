@@ -1,12 +1,12 @@
 package com.dkt.breaking.service;
 
-import com.dkt.breaking.model.MapData;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -21,7 +21,7 @@ public class MapsService {
         this.webClient = WebClient
             .builder()
             .baseUrl(mapApi)
-            .filter(logRequest())
+            /*.filter(logRequest())*/
             .defaultHeader("Authorization", appKey)
             .build();
     }
@@ -29,7 +29,7 @@ public class MapsService {
     /* 주소 검색 api
      * param: query, page, size
      * */
-    public Mono<MapData> getAddress(String address) {
+    public Mono<Map> getAddress(String address) {
         String path = "v2/local/search/address.json";
         return requestMapApis(path, address);
     }
@@ -37,7 +37,7 @@ public class MapsService {
     /* 키워드로 장소 검색 api
      * param: query, category_group_code, x, y, radius, rect, page, size, sort
      * */
-    public Mono<MapData> getPlaceByKeyword(MultiValueMap<String, String> query) {
+    public Mono<Map> getPlaceByKeyword(MultiValueMap<String, String> query) {
         String path = "/v2/local/search/keyword.json";
         return requestMapApisWithQuery(path, query);
     }
@@ -48,30 +48,31 @@ public class MapsService {
         return requestMapApis(host, category);
     }
 
-    public Mono<MapData> requestMapApis(String path, String address) {
+    public Mono<Map> requestMapApis(String path, String address) {
         return this.webClient
             .get()
             .uri(builder -> builder.path(path).queryParam("query", address).build())
             .retrieve()
-            .bodyToMono(MapData.class);
+            .bodyToMono(Map.class);
     }
 
     /**
      * 지도 api
+     * Daum Map api docs: https://developers.kakao.com/docs/restapi/local
      *
      * @param path  Daum Map Api host
      * @param query 검색을 원하는 질의어
      * @return 검색결과
      * @throws
-     * @seehttps://developers.kakao.com/docs/restapi/local
+     * @see
      */
 
-    public Mono<MapData> requestMapApisWithQuery(String path, MultiValueMap<String, String> query) {
-        Mono<MapData> result = this.webClient
+    public Mono<Map> requestMapApisWithQuery(String path, MultiValueMap<String, String> query) {
+        Mono<Map> result = this.webClient
             .get()
             .uri(builder -> builder.path(path).queryParams(query).build())
             .retrieve()
-            .bodyToMono(MapData.class);
+            .bodyToMono(Map.class);
 
         return result;
     }
