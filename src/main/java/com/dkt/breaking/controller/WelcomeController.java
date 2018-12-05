@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RestController
 public class WelcomeController {
 
-    @GetMapping(value = "/")
+    @GetMapping(value = "")
     public Mono<HelloWorld> sayHello(WebSession webSession) {
         HelloWorld hello = new HelloWorld();
 
@@ -31,7 +31,7 @@ public class WelcomeController {
         return Mono.just(hello);
     }
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public Mono<BreakingUserDetails> login(ServerWebExchange exchange, WebSession session) {
 
         return ReactiveSecurityContextHolder.getContext()

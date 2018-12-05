@@ -11,5 +11,8 @@ import reactor.core.publisher.Mono;
 public interface StoreRepository extends ReactiveCrudRepository<Store, String> {
 
     Mono<Boolean> existsByStoreKey(String storeKey);
+
     Mono<Long> countByStoreKey(String storeKey);
+
+    Mono<Store> findByStoreKey(String storeKey);
 }

@@ -21,4 +21,8 @@ public class Store {
     private String phone;
     private String x;
     private String y;
+
+    public Store(String storeKey) {
+        this.storeKey = storeKey;
+    }
 }

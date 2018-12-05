@@ -31,6 +31,8 @@ public class Review {
     @NotNull
     private String storeKey;
     @DBRef
+    private Store store;
+    @DBRef
     private User author;
     private String contents;
     @CreatedDate
@@ -39,6 +41,4 @@ public class Review {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime mod_at;
     private Boolean deleted = Boolean.FALSE;
-
-    private Long Pageable;
 }

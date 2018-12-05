@@ -12,9 +12,9 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface ReviewRepository extends ReactiveCrudRepository<Review, String> {
 
-    Flux<Review> findByStoreKeyAndDeletedFalse(Mono<String> storeKey, Pageable pageable);
+    Flux<Review> findByStoreKeyAndDeletedFalse(String storeKey, Pageable pageable);
 
-    Flux<Review> findByAuthor(Mono<String> userId);
+    Flux<Review> findByAuthorAndDeletedFalse(String userId, Pageable pageable);
 
-    Mono<Long> countByStoreKeyAndDeletedFalse(Mono<String> storeKey);
+    Mono<Long> countByStoreKeyAndDeletedFalse(String storeKey);
 }

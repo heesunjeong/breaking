@@ -31,28 +31,28 @@ public class ReviewController {
         return reviewService.saveReview(review, exchange);
     }
 
-    @GetMapping(value = "/list")
+    @GetMapping(value = "list")
     public Flux<Review> getReviewList(@RequestParam String storeKey, @RequestParam(name = "page", defaultValue = "0") Integer page, @RequestParam(name = "size", defaultValue = "5") Integer size) {
-        return reviewService.getReviewList(Mono.just(storeKey), page, size);
+        return reviewService.getReviewList(storeKey, page, size);
     }
 
-    @GetMapping(value = "/count")
+    @GetMapping(value = "author")
+    public Flux<Review> getReviewByAuthor(@RequestParam String userId, @RequestParam(name = "page", defaultValue = "0") Integer page, @RequestParam(name = "size", defaultValue = "5") Integer size) {
+        return reviewService.getReviewListByAuthor(userId, page, size);
+    }
+
+    @GetMapping(value = "count")
     public Mono<Long> count(@RequestParam String storeKey) {
-        return reviewService.countReview(Mono.just(storeKey));
+        return reviewService.countReview(storeKey);
     }
 
-    @PutMapping(value = "/update")
+    @PutMapping(value = "update")
     public Mono<Boolean> updateReview(@RequestBody Review review, ServerWebExchange exchange) {
         return reviewService.updateReview(review, exchange);
     }
 
-    @DeleteMapping(value = "/{reviewId}")
+    @DeleteMapping(value = "{reviewId}")
     public Mono<Boolean> deleteReview(@PathVariable String reviewId, ServerWebExchange exchange) {
         return reviewService.deleteReview(reviewId, exchange);
-    }
-
-    @GetMapping(value = "/author/{userId}")
-    public Flux<Review> getReviewByAuthor(@PathVariable String userId) {
-        return reviewService.getReviewListByAuthor(userId);
     }
 }

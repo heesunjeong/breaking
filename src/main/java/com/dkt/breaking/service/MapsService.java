@@ -1,9 +1,5 @@
 package com.dkt.breaking.service;
 
-import com.dkt.breaking.model.Store;
-import com.dkt.breaking.persistence.StoreRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -20,9 +16,6 @@ import reactor.core.publisher.Mono;
 public class MapsService {
 
     private final WebClient webClient;
-
-    @Autowired
-    private StoreRepository storeRepository;
 
     public MapsService(@Value("${api.map.url}") String mapApi, @Value("${api.map.appkey}") String appKey) {
         this.webClient = WebClient
@@ -82,15 +75,6 @@ public class MapsService {
             .bodyToMono(Map.class);
 
         return result;
-    }
-
-    public Mono<Boolean> savePlace(Store store) {
-
-        return storeRepository.countByStoreKey(store.getStoreKey())
-            .filter(place -> place == 0)
-            .flatMap(place -> storeRepository.save(store))
-            .map(place -> true)
-            .defaultIfEmpty(false);
     }
 
     private ExchangeFilterFunction logRequest() {

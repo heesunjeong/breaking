@@ -6,6 +6,7 @@ import com.dkt.breaking.persistence.ReviewRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -20,19 +21,32 @@ public class ReviewService {
     private UserService userService;
 
     @Autowired
+    private StoreService storeService;
+
+    @Autowired
     private ReviewRepository reviewRepository;
+
+    public Flux<Review> getReviewList(String storeKey, Integer page, Integer size) {
+        return reviewRepository.findByStoreKeyAndDeletedFalse(storeKey, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reg_at")));
+    }
+
+    public Flux<Review> getReviewListByAuthor(String userId, Integer page, Integer size) {
+        return reviewRepository.findByAuthorAndDeletedFalse(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reg_at")));
+    }
 
     public Mono<Boolean> saveReview(Review review, ServerWebExchange exchange) {
         String userId = validateTokenAndGetUserId(exchange);
 
-        review.setAuthor(new User(userId));
-        return reviewRepository.save(review)
-            .map(u -> true)
-            .defaultIfEmpty(false);
-    }
+        return storeService.getStore(review.getStoreKey())
+            .flatMap(store -> {
+                System.out.println(store);
 
-    public Flux<Review> getReviewList(Mono<String> storeKey, int page, int size) {
-        return reviewRepository.findByStoreKeyAndDeletedFalse(storeKey, PageRequest.of(page, size));
+                review.setAuthor(new User(userId));
+                review.setStore(store);
+                return reviewRepository.save(review);
+            })
+            .map(s -> true)
+            .defaultIfEmpty(false);
     }
 
     public Mono<Boolean> updateReview(Review review, ServerWebExchange exchange) {
@@ -61,11 +75,6 @@ public class ReviewService {
             .defaultIfEmpty(false);
     }
 
-    public Flux<Review> getReviewListByAuthor(String userId) {
-        return reviewRepository.findByAuthor(Mono.just(userId))
-            .filter(r -> !r.getDeleted());
-    }
-
     private String validateTokenAndGetUserId(ServerWebExchange exchange) {
         String userId = userService.getUserIdByToken(exchange);
 
@@ -75,7 +84,7 @@ public class ReviewService {
         return userId;
     }
 
-    public Mono<Long> countReview(Mono<String> storeKey) {
+    public Mono<Long> countReview(String storeKey) {
         return reviewRepository.countByStoreKeyAndDeletedFalse(storeKey).defaultIfEmpty(0L);
     }
 }
