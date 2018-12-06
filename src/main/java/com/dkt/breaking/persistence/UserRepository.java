@@ -11,4 +11,6 @@ import reactor.core.publisher.Mono;
 public interface UserRepository extends ReactiveCrudRepository<User, String> {
 
     Mono<User> findByEmail(String email);
+
+    Mono<Long> countByEmail(String userId);
 }

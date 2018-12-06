@@ -57,6 +57,7 @@ public class UserService {
     }
 
     public Mono<Boolean> addUser(User user) {
+        // TODO email 중복체크
         user.setRoles(Collections.singleton(UserRole.ROLE_USER));
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
@@ -136,5 +137,12 @@ public class UserService {
     @PreAuthorize("hasPermission(#user, 'edit')")
     public Mono<Void> processUser(Mono<User> user) {
         return Mono.just(null);
+    }
+
+    public Mono<Boolean> existUserId(String userId) {
+        return userRepository.countByEmail(userId)
+            .filter(count -> count == 0L)
+            .map(c->true)
+            .defaultIfEmpty(false);
     }
 }

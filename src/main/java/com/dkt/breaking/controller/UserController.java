@@ -67,4 +67,9 @@ public class UserController {
             return Mono.just(clientRequest);
         });
     }
+
+    @GetMapping("validate/{userId}")
+    public Mono<Boolean> validateId(@PathVariable String userId) {
+        return userService.existUserId(userId);
+    }
 }
