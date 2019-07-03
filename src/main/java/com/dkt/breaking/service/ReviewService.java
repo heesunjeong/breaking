@@ -10,7 +10,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 
-import io.jsonwebtoken.UnsupportedJwtException;
+import java.util.Optional;
+
+import javax.validation.ValidationException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -76,12 +79,9 @@ public class ReviewService {
     }
 
     private String validateTokenAndGetUserId(ServerWebExchange exchange) {
-        String userId = userService.getUserIdByToken(exchange);
 
-        if (userId == "" || userId.isEmpty()) {
-            new UnsupportedJwtException("Not Supported Token Error");
-        }
-        return userId;
+        return Optional.ofNullable(userService.getUserIdByToken(exchange))
+            .orElseThrow(() -> new ValidationException());
     }
 
     public Mono<Long> countReview(String storeKey) {

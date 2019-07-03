@@ -3,6 +3,8 @@ package com.dkt.breaking.controller;
 import com.dkt.breaking.configuration.security.BreakingUserDetails;
 import com.dkt.breaking.model.HelloWorld;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -19,6 +21,8 @@ import reactor.core.publisher.Mono;
 @RestController
 public class WelcomeController {
 
+    Logger logger = LoggerFactory.getLogger(WelcomeController.class);
+
     @GetMapping(value = "")
     public Mono<HelloWorld> sayHello(WebSession webSession) {
         HelloWorld hello = new HelloWorld();
@@ -27,6 +31,8 @@ public class WelcomeController {
 
         hello.setTitle("hello");
         hello.setMessage("hi");
+
+        logger.debug("hi");
 
         return Mono.just(hello);
     }

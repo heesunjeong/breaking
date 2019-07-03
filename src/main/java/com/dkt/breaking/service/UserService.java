@@ -12,7 +12,6 @@ import com.dkt.breaking.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import reactor.core.publisher.Mono;
@@ -123,14 +123,12 @@ public class UserService {
     }
 
     public String getJwtToken(ServerWebExchange exchange) {
-        ServerHttpRequest request = exchange.getRequest();
-        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        } else {
-            return "";
-        }
+        return Optional.ofNullable(exchange.getRequest())
+            .map(r->r.getHeaders())
+            .map(h->h.getFirst(HttpHeaders.AUTHORIZATION))
+            .filter(auth -> auth.startsWith("Bearer "))
+            .map(auth -> auth.substring(7))
+            .orElse("");
     }
 
     @PreAuthorize("hasPermission(#user, 'edit')")
