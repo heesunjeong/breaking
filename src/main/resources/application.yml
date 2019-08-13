@@ -30,5 +30,5 @@ api:
 # app key
 app:
   jwt:
-    Secret: secretsecret
+    secret: the-secret-signing-key-for-bbbbreaking$$
     expiration: 28800

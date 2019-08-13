@@ -25,7 +25,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtTokenProvider implements Serializable {
 
-    @Value("${app.jwt.Secret}")
+    @Value("${app.jwt.secret}")
     private String secret;
 
     @Value("${app.jwt.expiration}")
@@ -36,7 +36,7 @@ public class JwtTokenProvider implements Serializable {
 
     private String REDIS_KEY = "break:user:refresh:%s";
 
-    private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private SecretKey key = Keys.hmacShaKeyFor("the-secret-signing-key-for-bbbbreaking$$".getBytes());
 
     public Claims getAllClaimsFromToken(String token) {
         Claims claims;
@@ -84,7 +84,7 @@ public class JwtTokenProvider implements Serializable {
             .setSubject(username)
             .setIssuedAt(createdDate)
             .setExpiration(expirationDate)
-            .signWith(key)
+            .signWith(key, SignatureAlgorithm.HS256)
             .compact();
     }
 
