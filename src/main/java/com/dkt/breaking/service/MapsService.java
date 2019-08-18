@@ -1,5 +1,7 @@
 package com.dkt.breaking.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -15,15 +17,11 @@ import reactor.core.publisher.Mono;
 @Service
 public class MapsService {
 
-    private final WebClient webClient;
+    private final WebClient mapWebClient;
 
-    public MapsService(@Value("${api.map.url}") String mapApi, @Value("${api.map.appkey}") String appKey) {
-        this.webClient = WebClient
-            .builder()
-            .baseUrl(mapApi)
-            /*.filter(logRequest())*/
-            .defaultHeader("Authorization", appKey)
-            .build();
+    @Autowired
+    public MapsService(WebClient mapWebClient) {
+        this.mapWebClient = mapWebClient;
     }
 
     /* 주소 검색 api
@@ -49,11 +47,11 @@ public class MapsService {
     }
 
     public Mono<Map> requestMapApis(String path, String address) {
-        return this.webClient
-            .get()
-            .uri(builder -> builder.path(path).queryParam("query", address).build())
-            .retrieve()
-            .bodyToMono(Map.class);
+        return mapWebClient
+                .get()
+                .uri(builder -> builder.path(path).queryParam("query", address).build())
+                .retrieve()
+                .bodyToMono(Map.class);
     }
 
     /**
@@ -68,11 +66,11 @@ public class MapsService {
      */
 
     public Mono<Map> requestMapApisWithQuery(String path, MultiValueMap<String, String> query) {
-        Mono<Map> result = this.webClient
-            .get()
-            .uri(builder -> builder.path(path).queryParams(query).build())
-            .retrieve()
-            .bodyToMono(Map.class);
+        Mono<Map> result = mapWebClient
+                .get()
+                .uri(builder -> builder.path(path).queryParams(query).build())
+                .retrieve()
+                .bodyToMono(Map.class);
 
         return result;
     }
